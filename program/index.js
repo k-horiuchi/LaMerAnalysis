@@ -3,7 +3,7 @@ const puppeteer = require('puppeteer')
 const fs = require('fs')
 
 // エラーが発生した場合はこの値を10000などに増やしてあげる
-const waitTime = 1000
+const waitTime = 2000
 
 const options = {
   headless: true,
@@ -35,23 +35,24 @@ const options = {
   fs.writeFile('program/data.json', "", (err) => { if (err) throw err })
   let output = []
 
+  // LaMerのベータテスト参加ページにアクセスする
+  await page.goto(`https://select-type.com/rsv/?id=yQsFJyBS9zk&w_flg=1`, { waitUntil: 'networkidle0' })
+  await page.waitForTimeout(waitTime)
+
   for(let cast in castList)
   {
     console.log(`${castList[cast]} (ID:${cast}) の情報を取得中...`)
-
-    // LaMerのベータテスト参加ページにアクセスする
-    await page.goto(`https://select-type.com/rsv/?id=yQsFJyBS9zk&w_flg=1`, { waitUntil: 'networkidle0' })
-
-    // 待機する
-    await page.waitForTimeout(waitTime)
 
     // キャストを選択する
     await page.select('.row-fluid > .content > .content-body > .list-group > .span12', cast)
     await page.waitForTimeout(waitTime)
 
     // 30分を選択する
-    await page.click('li:nth-child(1) > .box > .box-body > .box-footer > .btn')
-    await page.waitForTimeout(waitTime)
+    if(cast == "153254")
+    {
+      await page.click('li:nth-child(1) > .box > .box-body > .box-footer > .btn')
+      await page.waitForTimeout(waitTime)
+    }
 
     // 日時情報を取得する
     const scrapingData = await page.evaluate(() => {
